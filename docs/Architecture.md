@@ -1,14 +1,14 @@
 # Architecture.md — CodeInsight
 
-**Version:** 1.0
-**Status:** Locked for MVP build
+**Version:** 1.1
+**Status:** Locked for MVP monorepo build
 **Traces back to:** PRD.md v1.0
 
 ---
 
 ## 1. Tech Stack
 
-### Frontend (Repo: `codeinsight-web`)
+### Frontend (Package: `codeinsight-web`)
 ```
 React 18 + TypeScript + Vite
 Tailwind CSS + shadcn/ui (copied-in components, not a dependency)
@@ -19,7 +19,7 @@ TanStack Query       → server state, caching, SSE-friendly data fetching
 Clerk React SDK      → auth UI + session
 ```
 
-### Backend (Repo: `codeinsight-api`)
+### Backend (Package: `codeinsight-api`)
 ```
 Node.js + Fastify + TypeScript
 Zod                  → request/response validation
@@ -30,6 +30,16 @@ ts-morph              → JS/TS AST parsing (Code Analyzer)
 node-sql-parser        → SQL parsing (Database Analyzer)
 Fastify SSE plugin (@fastify/sse or manual SSE headers) → Correlation Engine streaming
 Clerk Node SDK (fastify-clerk or manual JWT verification) → auth middleware
+```
+
+### Shared Contracts (Package: `packages/shared-contracts`)
+```
+TypeScript Interfaces & Domain Schemas
+- Common Finding model
+- Evidence model
+- AnalyzerResult container model
+- Summary & Metrics models
+- Shared Enums (Severity, Category)
 ```
 
 ### Database & Infra
@@ -44,88 +54,96 @@ Backend deploy — Railway
 - **Fastify over Express:** ~2x throughput, schema-based validation built in, still simple enough to explain in 30 seconds.
 - **Drizzle over Prisma:** SQL-close syntax, no query-engine binary, faster cold starts on Railway — relevant since analyzer endpoints are already CPU-heavy (AST/SQL parsing).
 - **Clerk over Supabase Auth:** Neon is the DB of record, not Supabase — Clerk decouples identity from database choice and has the better free-tier DX for a solo project.
-- **REST over tRPC:** Two separate repos means REST's looser coupling is the right trade — tRPC's main benefit (shared types with zero duplication) matters most in a monorepo, which we explicitly decided against.
+- **Monorepo Architecture:** Single Git repository (`CodeInsight`) sharing TypeScript contracts (`packages/shared-contracts`) between backend API, frontend web client, and benchmark fixtures without code duplication.
 - **SSE over WebSockets:** Correlation Engine output is one-directional (server → client streaming reasoning) — SSE is simpler than WebSockets for this and Fastify supports it natively.
 
 ---
 
 ## 2. Repository Structure
 
-### `codeinsight-web/`
 ```
-codeinsight-web/
-├── docs/                        # Copied/synced from planning phase
+CodeInsight/ (Monorepo Root)
+├── docs/                        # Project-wide documentation
 │   ├── PRD.md
 │   ├── Architecture.md
 │   ├── Design.md
 │   ├── Rules.md
 │   ├── Phases.md
-│   └── Memory.md
-├── src/
-│   ├── app/                     # Route-level pages
-│   │   ├── projects/            # "My Projects" list + project detail
-│   │   ├── auth/                # Clerk sign-in/sign-up wrappers
-│   │   └── demo/                # CodeInsight Demo Repository entry point
-│   ├── components/
-│   │   ├── ui/                  # shadcn/ui primitives (copied in)
-│   │   ├── code-analyzer/       # Dependency graph (React Flow), tech debt cards
-│   │   ├── db-analyzer/         # Query before/after, index suggestions
-│   │   ├── log-analyzer/        # Timeline (Recharts), anomaly list
-│   │   └── correlation/         # Streaming unified report view
-│   ├── lib/
-│   │   ├── api-client.ts        # Typed REST client (fetch wrapper)
-│   │   ├── sse-client.ts        # SSE connection handler for correlation stream
-│   │   └── clerk.ts
-│   ├── context/                 # React Context providers (active project, etc.)
-│   ├── types/                   # Shared TS types (mirrored manually from backend)
-│   └── main.tsx
-├── package.json
-└── vite.config.ts
+│   ├── Memory.md
+│   └── EXPECTED_FINDINGS.md
+├── packages/
+│   └── shared-contracts/        # Shared TypeScript interfaces & contracts
+│       ├── src/
+│       │   ├── finding.ts       # Finding & Evidence interfaces
+│       │   ├── analyzer.ts      # AnalyzerResult, Summary, Metrics interfaces
+│       │   └── enums.ts         # Shared severity and category enums
+│       └── package.json
+├── codeinsight-web/             # Frontend application (Vite + React SPA)
+│   ├── src/
+│   │   ├── app/                 # Route-level pages
+│   │   │   ├── projects/        # "My Projects" list + project detail
+│   │   │   ├── auth/            # Clerk sign-in/sign-up wrappers
+│   │   │   └── demo/            # CodeInsight Demo Repository entry point
+│   │   ├── components/
+│   │   │   ├── ui/              # shadcn/ui primitives (copied in)
+│   │   │   ├── code-analyzer/   # Dependency graph (React Flow), tech debt cards
+│   │   │   ├── db-analyzer/     # Query before/after, index suggestions
+│   │   │   ├── log-analyzer/    # Timeline (Recharts), anomaly list
+│   │   │   └── correlation/     # Streaming unified report view
+│   │   ├── lib/
+│   │   │   ├── api-client.ts    # Typed REST client (fetch wrapper)
+│   │   │   ├── sse-client.ts    # SSE connection handler for correlation stream
+│   │   │   └── clerk.ts
+│   │   ├── context/             # React Context providers (active project, etc.)
+│   │   └── main.tsx
+│   ├── package.json
+│   └── vite.config.ts
+├── codeinsight-api/             # Backend service (Node.js + Fastify API)
+│   ├── src/
+│   │   ├── server.ts             # Fastify bootstrap
+│   │   ├── routes/
+│   │   │   ├── projects.routes.ts
+│   │   │   ├── code-analyzer.routes.ts
+│   │   │   ├── db-analyzer.routes.ts
+│   │   │   ├── log-analyzer.routes.ts
+│   │   │   └── correlation.routes.ts # SSE endpoint lives here
+│   │   ├── analyzers/
+│   │   │   ├── code/
+│   │   │   │   ├── clone.ts          # simple-git shallow clone + cleanup
+│   │   │   │   ├── ast-parser.ts     # ts-morph extraction
+│   │   │   │   ├── dependency-graph.ts
+│   │   │   │   ├── tech-debt-score.ts
+│   │   │   │   └── prompt.ts         # Claude prompt template
+│   │   │   ├── database/
+│   │   │   │   ├── sql-parser.ts
+│   │   │   │   ├── rules.ts          # deterministic SQL checks
+│   │   │   │   └── prompt.ts
+│   │   │   ├── logs/
+│   │   │   │   ├── anomaly-detection.ts # z-score/threshold logic
+│   │   │   │   └── prompt.ts
+│   │   │   └── correlation/
+│   │   │       ├── tool-definitions.ts # Claude function-calling schema
+│   │   │       ├── orchestrator.ts   # calls 3 analyzers' stored findings, streams reasoning
+│   │   │       └── prompt.ts
+│   │   ├── services/
+│   │   │   ├── claude-client.ts  # shared Anthropic SDK instance
+│   │   │   ├── auth.ts           # Clerk JWT verification middleware
+│   │   │   └── db.ts             # Drizzle client init
+│   │   ├── db/
+│   │   │   ├── schema.ts         # Drizzle schema definitions
+│   │   │   └── migrations/
+│   │   └── seed/
+│   │       └── demo-repository-seed.ts
+│   ├── package.json
+│   └── drizzle.config.ts
+└── codeinsight-demo-repo/       # Ground-truth benchmark dataset repository
+    ├── src/                     # TaskLedger TypeScript application
+    ├── db/                      # PostgreSQL DDL schema & queries
+    ├── logs/                    # Structured JSON time-series logs
+    └── package.json
 ```
 
-### `codeinsight-api/`
-```
-codeinsight-api/
-├── src/
-│   ├── server.ts                 # Fastify bootstrap
-│   ├── routes/
-│   │   ├── projects.routes.ts
-│   │   ├── code-analyzer.routes.ts
-│   │   ├── db-analyzer.routes.ts
-│   │   ├── log-analyzer.routes.ts
-│   │   └── correlation.routes.ts # SSE endpoint lives here
-│   ├── analyzers/
-│   │   ├── code/
-│   │   │   ├── clone.ts          # simple-git shallow clone + cleanup
-│   │   │   ├── ast-parser.ts     # ts-morph extraction
-│   │   │   ├── dependency-graph.ts
-│   │   │   ├── tech-debt-score.ts
-│   │   │   └── prompt.ts         # Claude prompt template, owned by this analyzer
-│   │   ├── database/
-│   │   │   ├── sql-parser.ts
-│   │   │   ├── rules.ts          # deterministic checks (SELECT *, missing index, etc.)
-│   │   │   └── prompt.ts
-│   │   ├── logs/
-│   │   │   ├── anomaly-detection.ts  # z-score/threshold logic
-│   │   │   └── prompt.ts
-│   │   └── correlation/
-│   │       ├── tool-definitions.ts   # Claude function-calling schema
-│   │       ├── orchestrator.ts       # calls the 3 analyzers' stored findings, streams reasoning
-│   │       └── prompt.ts
-│   ├── services/
-│   │   ├── claude-client.ts      # single shared Anthropic SDK instance
-│   │   ├── auth.ts               # Clerk JWT verification middleware
-│   │   └── db.ts                 # Drizzle client init
-│   ├── db/
-│   │   ├── schema.ts             # Drizzle schema definitions
-│   │   └── migrations/
-│   └── seed/
-│       └── demo-repository-seed.ts  # Seeds the CodeInsight Demo Repository project
-├── package.json
-└── drizzle.config.ts
-```
-
-**Note on the future worker split (per your decision):** `analyzers/*` is intentionally isolated from `routes/*` — each analyzer module exports a plain async function with no Fastify-specific code inside it. This means a future move to a worker/queue (e.g., BullMQ) only requires changing *how* these functions are invoked, not rewriting their internals.
+**Note on the worker split:** `analyzers/*` is intentionally isolated from `routes/*` — each analyzer module exports a plain async function with no Fastify-specific code inside it, returning a standardized `AnalyzerResult` payload.
 
 ---
 
@@ -168,7 +186,7 @@ analysis_sessions {
 findings {
   id: uuid (pk)
   sessionId: uuid (fk -> analysis_sessions.id)
-  category: enum('architecture', 'tech_debt', 'query_optimization', 'anomaly', ...)
+  category: enum('architecture', 'tech_debt', 'query_optimization', 'anomaly')
   severity: enum('low', 'medium', 'high', 'critical')
   title: text
   description: text
@@ -186,11 +204,53 @@ reports {
 }
 ```
 
-**Grounding mechanism (important, ties back to PRD 5.4):** every item in a `report.actionPlan` must carry a `referencedFindingIds: string[]` field. The Correlation Engine prompt explicitly instructs Claude to only make claims traceable to a `finding.id` it was given via function calling — this is enforced at the prompt level and spot-checked against the demo repository's known issues.
+---
+
+## 4. Common Finding & Analyzer Output Model
+
+All three analyzers (Code, Database, Logs) operate as independent modules that produce standardized findings conforming to a shared domain contract defined in `packages/shared-contracts`.
+
+### Shared Analyzer Contract Principle
+
+Every analyzer in CodeInsight (Code, Database, Logs) produces findings adhering strictly to the same shared domain model defined in `packages/shared-contracts`. Analyzers differ only in their ingestion strategy and parsing mechanisms (AST analysis, SQL parsing, or log anomaly detection). The API endpoints, UI Dashboard tabs, persistent DB reports, and Correlation Engine consume exclusively the standardized `Finding` and `AnalyzerResult` contracts. No analyzer is permitted to expose its own custom output shape or bypass these shared contract boundaries.
+
+Every analyzer execution returns an `AnalyzerResult` structure comprising five key sub-models:
+
+1. **`Finding`**: Individual, addressable issue entry stored in the database and referenced by ID in correlation reports.
+   - `id`: unique finding UUID
+   - `sessionId`: associated analysis session UUID
+   - `category`: shared category enum (`architecture`, `tech_debt`, `query_optimization`, `anomaly`)
+   - `severity`: shared severity enum (`low`, `medium`, `high`, `critical`)
+   - `title`: short descriptive title
+   - `description`: detailed explanation of the finding
+   - `metadata`: type-specific metadata payload (e.g. cycle path, AST node type, query string)
+
+2. **`Evidence`**: Concrete, deterministic proof supporting the finding.
+   - `location`: file path, query identifier, or log timestamp reference
+   - `lineStart` & `lineEnd`: exact source line bounds (for Code Analyzer)
+   - `snippet`: exact code snippet, SQL query fragment, or raw JSON log entry
+   - `threshold`: metric baseline or rule threshold triggered (e.g. z-score > 3.0, query duration > 1500ms, cycle depth)
+
+3. **`AnalyzerResult`**: Top-level container returned by all analyzer services.
+   - `sessionId`: unique session identifier
+   - `status`: execution state (`pending`, `running`, `completed`, `failed`)
+   - `findings`: array of `Finding[]` items
+   - `summary`: analyzer execution summary object
+   - `metrics`: aggregated metrics object
+
+4. **`Summary`**: Plain-English narrative and impact breakdown.
+   - `headline`: high-level status statement
+   - `overview`: Claude-generated or rule-based executive narrative
+   - `totalFindings`: total count broken down by severity
+
+5. **`Metrics`**: Quantitative measurements computed during analysis.
+   - `score`: composite health or tech debt score (0–100 scale)
+   - `counts`: breakdown metrics (e.g. total queries parsed, total log entries analyzed, file count)
+   - `performanceMs`: analysis execution time
 
 ---
 
-## 4. API Flow (REST)
+## 5. API Flow (REST) & Response Contracts
 
 ```
 Auth
@@ -204,27 +264,27 @@ DELETE /api/projects/:id
 POST   /api/projects/demo                ← one-click load CodeInsight Demo Repository
 
 Code Analyzer
-POST   /api/projects/:id/analyze/code    ← triggers clone + AST parse + Claude reasoning
-GET    /api/projects/:id/code/findings   ← latest code findings + dependency graph data
+POST   /api/projects/:id/analyze/code    ← triggers clone + AST parse + Claude reasoning → returns AnalyzerResult
+GET    /api/projects/:id/code/findings   ← latest AnalyzerResult (findings + dependency graph data)
 
 Database Analyzer
-POST   /api/projects/:id/analyze/database ← body: { schema, queries[] }
-GET    /api/projects/:id/database/findings
+POST   /api/projects/:id/analyze/database ← body: { schema, queries[] } → returns AnalyzerResult
+GET    /api/projects/:id/database/findings ← latest AnalyzerResult (query findings + index recommendations)
 
 Log Analyzer
-POST   /api/projects/:id/analyze/logs    ← body: { logs: JSON[] }
-GET    /api/projects/:id/logs/findings
+POST   /api/projects/:id/analyze/logs    ← body: { logs: JSON[] } → returns AnalyzerResult
+GET    /api/projects/:id/logs/findings   ← latest AnalyzerResult (log findings + timeline data)
 
 Correlation Engine
 GET    /api/projects/:id/correlate       ← SSE stream; requires all 3 analyzer sessions to exist
-                                             streams: reasoning tokens → final actionPlan → [DONE]
+                                              streams: reasoning tokens → final actionPlan → [DONE]
 ```
 
 **Auth middleware:** every route except the Clerk webhook requires a valid Clerk session JWT, verified in Fastify's `onRequest` hook, resolving to a `userId` used to scope all project queries (no cross-user data access).
 
 ---
 
-## 5. Correlation Engine Flow (SSE Detail)
+## 6. Correlation Engine Flow (SSE Detail)
 
 ```
 1. Frontend opens EventSource connection to GET /api/projects/:id/correlate
@@ -244,7 +304,7 @@ GET    /api/projects/:id/correlate       ← SSE stream; requires all 3 analyzer
 
 ---
 
-## 6. State Management Boundaries (Frontend)
+## 7. State Management Boundaries (Frontend)
 
 Given the "React Context + useState only" decision — clear rules to avoid this becoming messy:
 
@@ -254,7 +314,7 @@ Given the "React Context + useState only" decision — clear rules to avoid this
 
 ---
 
-## 7. Deployment Topology
+## 8. Deployment Topology
 
 ```
                     ┌─────────────┐
@@ -278,8 +338,8 @@ Given the "React Context + useState only" decision — clear rules to avoid this
 
 ---
 
-## 8. Open Items Deferred to Rules.md / Phases.md
+## 9. Open Items Deferred to Rules.md / Phases.md
 
 - Exact error-handling conventions (how failed analyzer runs surface to the user) → Rules.md
 - Rate limiting / abuse prevention on the `/analyze/*` endpoints (e.g., repo size caps) → Rules.md
-- Build order and week-by-week breakdown → Phases.md
+- Build order and phase breakdown → Phases.md

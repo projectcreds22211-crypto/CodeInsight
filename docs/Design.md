@@ -1,6 +1,6 @@
 # Design.md — CodeInsight
 
-**Version:** 1.0
+**Version:** 1.1
 **Status:** Locked for MVP build
 **Reference:** Alcove-style landing page (warm cream, bold rounded display type, coral highlight, dark pill CTAs, soft depth)
 **Traces back to:** PRD.md v1.0, Architecture.md v1.0
@@ -179,9 +179,38 @@ radius-full: 999px → pill buttons (primary CTAs, tab pills) — direct match t
 ### Highlight Text Block
 - The reference's signature move (pink block behind "Mac") — replicated as a reusable `<Highlight>` inline component: `background: var(--accent-coral)`, small `radius-sm`, slight negative margin to hug the text. Used sparingly — once per headline, never mid-paragraph.
 
-### Findings Card (app-specific, new)
-- Severity indicated by a 4px left border in `--success` / `--warning` / `--critical` — not by background color fill, keeping the card itself neutral and readable.
-- Analyzer origin indicated by a small colored dot using the Analyzer Identity Colors above.
+### Reusable Analysis Components (Shared Across All Analyzers & Correlation)
+
+These four core UI primitives are defined once in `codeinsight-web/src/components/ui/` and reused across all analyzer tabs (Code, Database, Logs) and the Unified Correlation Report view.
+
+#### 1. Severity Badge
+- **Variants:** `low`, `medium`, `high`, `critical`.
+- **Styling:** Small capsule badge (`radius-full`, `caption` font weight 600, 4px 10px padding).
+- **Colors:**
+  - `low`: `--success` text (`#3E9C6E`) on soft green background tint (`#EBF5F0`).
+  - `medium`: `--warning` text (`#D98E3B`) on soft amber background tint (`#FDF5EB`).
+  - `high` / `critical`: `--critical` text (`#D9483E`) on soft red background tint (`#FDF0EF`).
+
+#### 2. Analyzer Badge
+- **Variants:** `code`, `database`, `logs`, `correlation`.
+- **Styling:** Small tag badge with leading 6px colored dot + `caption` text.
+- **Identity Colors:**
+  - `code`: `--analyzer-code` (`#6B4CE6`).
+  - `database`: `--analyzer-db` (`#2E9C8F`).
+  - `logs`: `--analyzer-logs` (`#D98E3B`).
+  - `correlation`: gradient dot (`#6B4CE6` $\rightarrow$ `#FF9EB0`).
+
+#### 3. Finding Card
+- **Layout:** Reusable `--surface-card` panel with 4px left border accent matching the finding's `severity` color.
+- **Header:** Top row containing `Analyzer Badge` (left) and `Severity Badge` (right), followed by finding title (`heading-md`).
+- **Body:** Description text (`body` 14px) explaining the root cause or recommendation.
+- **Embedded Content:** Houses zero or more `Evidence Block` components displaying exact proof.
+
+#### 4. Evidence Block
+- **Layout:** Contained code/data block with `--surface-bg` neutral background, subtle border, and `radius-sm`.
+- **Header Line:** Small `caption` label showing file locator (`filePath:lineStart-lineEnd`), query index, or log timestamp.
+- **Code Container:** Monospace `JetBrains Mono` (`code` 13px) for syntax-highlighted code snippets, parsed SQL query fragments, or JSON log payloads.
+- **Threshold Indicator:** Highlighted marker showing rule thresholds or metrics triggered (e.g. `[Threshold: latency > 1500ms (actual: 1620ms)]`).
 
 ### Tabs (Code / Database / Logs / Unified)
 - Underline-style, active tab uses its Analyzer Identity Color for the underline; "Unified" tab uses the thread-purple → coral gradient to visually signal "this is where they combine."

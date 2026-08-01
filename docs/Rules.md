@@ -1,6 +1,6 @@
 # Rules.md — CodeInsight
 
-**Version:** 1.0
+**Version:** 1.1
 **Status:** Locked — standing instructions for every AI coding session
 **Traces back to:** PRD.md, Architecture.md, Design.md
 
@@ -33,6 +33,9 @@ CodeInsight is built across three AI tools with different strengths. Assign work
 ### Backend
 `fastify`, `typescript`, `zod`, `drizzle-orm`, `@anthropic-ai/sdk`, `simple-git`, `ts-morph`, `node-sql-parser`, `@clerk/backend` (or Fastify-compatible Clerk JWT verification), `@fastify/cors`
 
+### Shared Monorepo Packages
+`packages/shared-contracts` (shared domain interfaces, Finding model, AnalyzerResult, Evidence, Severity/Category enums)
+
 ### Dev Tooling
 `eslint`, `prettier`, `husky`, `lint-staged`, `vitest`, `@testing-library/react`
 
@@ -50,7 +53,7 @@ CodeInsight is built across three AI tools with different strengths. Assign work
 ## 3. Coding Style & Conventions
 
 ### General
-- TypeScript strict mode on, in both repos, no exceptions.
+- TypeScript strict mode on, in all monorepo packages, no exceptions.
 - Function/variable naming: descriptive, no abbreviations except well-known ones (`db`, `req`, `res`, `id`). `analyzeCodebase()`, not `analyzeCB()`.
 - File naming: kebab-case (`dependency-graph.ts`), component files PascalCase (`FindingCard.tsx`).
 - No `any` type without an inline comment explaining why it's unavoidable.
@@ -71,8 +74,16 @@ Every commit message should make sense read on its own, without opening the diff
 
 ---
 
-## 4. Error Handling
+## 4. Error Handling & Shared Analyzer Contracts
 
+### Shared Platform Contracts
+- All analyzers (Code, Database, Logs) must import and implement the shared domain contracts exported from `packages/shared-contracts`.
+- **Single Finding Model:** Every finding produced by any analyzer must adhere strictly to the shared `Finding` model (`id`, `sessionId`, `category`, `severity`, `title`, `description`, `metadata`). No custom or ad-hoc finding shapes are permitted.
+- **Single Severity Model:** All analyzers must use the unified `Severity` enum (`low`, `medium`, `high`, `critical`).
+- **Single AnalyzerResult Model:** Every analyzer execution must return the standardized `AnalyzerResult` container payload comprising `sessionId`, `status`, `findings`, `summary`, `metrics`, and `Evidence[]`.
+- **Non-Divergence Rule:** Analyzer outputs against the ground-truth benchmark dataset (`codeinsight-demo-repo`) must remain strictly deterministic and match `docs/EXPECTED_FINDINGS.md`. Analyzer logic must never produce divergent, non-deterministic, or missing findings across runs.
+
+### Error Boundaries & Handling
 - Every analyzer function returns a discriminated result, never throws past its own boundary:
   ```typescript
   type AnalyzerResult<T> =
@@ -87,7 +98,7 @@ Every commit message should make sense read on its own, without opening the diff
 
 ## 5. Security Rules
 
-- No credentials, API keys, or secrets ever committed — `.env` files gitignored in both repos from the first commit.
+- No credentials, API keys, or secrets ever committed — `.env` files gitignored across all packages from the first commit.
 - Auth: every non-webhook API route requires Clerk JWT verification in the `onRequest` hook — no route is "temporarily unprotected" during development.
 - All project/finding/report queries scoped by `userId` derived from the verified JWT — never trust a client-supplied user ID.
 - Cloned repositories: read-only, shallow clone, sandboxed to a temp directory, deleted in a `finally` block regardless of success/failure — no persistent filesystem state (Architecture.md Section 7).
@@ -117,7 +128,7 @@ Every commit message should make sense read on its own, without opening the diff
 ## 8. Testing (locked: Vitest + React Testing Library)
 
 - MVP testing scope, in priority order:
-  1. Deterministic analyzer logic (SQL rules, anomaly z-score detection, cycle detection) — these are the credibility-critical functions, they get real unit tests.
+  1. Deterministic analyzer logic (SQL rules, anomaly z-score detection, cycle detection) — these are the credibility-critical functions, they get real unit tests matching `EXPECTED_FINDINGS.md`.
   2. Correlation grounding — a test verifying every `actionPlan` item's `referencedFindingIds` actually exist in the findings passed to that session.
   3. Core UI flows (create project, run an analyzer, view findings) — lighter-touch component/integration tests.
 - Not required for MVP: full coverage of styling/presentational components, exhaustive edge-case coverage on every UI branch.
@@ -128,7 +139,7 @@ Every commit message should make sense read on its own, without opening the diff
 
 - Follow the folder structures defined in Architecture.md Section 2 exactly — do not introduce new top-level folders without flagging it first.
 - Each analyzer's `prompt.ts` stays colocated with that analyzer's own logic (Architecture.md's locked decision) — never centralize all prompts into one shared file.
-- `docs/` folder (PRD, Architecture, Design, Rules, Phases, Memory) is duplicated identically across both repos and must be kept in sync — if a doc changes, update both copies in the same session.
+- `docs/` folder (PRD, Architecture, Design, Rules, Phases, Memory, EXPECTED_FINDINGS) is maintained in the monorepo root and must be kept in sync across all documentation references.
 
 ---
 
@@ -151,11 +162,13 @@ Everything else — implementing a planned feature from Phases.md, fixing a bug,
 - Never commit secrets, API keys, or `.env` files.
 - Never add a rejected library from Section 2's exclusion list.
 - Never let one analyzer's failure crash the other two.
+- Never construct ad-hoc or custom finding shapes that bypass `packages/shared-contracts`.
+- Never allow analyzer outputs to diverge from `docs/EXPECTED_FINDINGS.md` ground-truth benchmark baseline across execution runs.
 - Never present a Claude-generated correlation claim that isn't traceable to a `finding.id`.
 - Never apply `theme-marketing`'s full cream background to a data-dense dashboard view.
 - Never introduce global state management outside React Context + TanStack Query.
 - Never execute code from a cloned/analyzed repository.
-- Never skip updating Memory.md at the end of a session (Section 12).
+- Never skip updating Memory.md at the end of a session (Section 13).
 
 ---
 

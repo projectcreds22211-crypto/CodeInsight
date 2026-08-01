@@ -1,7 +1,7 @@
 # PRD.md — CodeInsight
 
 **Product Requirements Document**
-**Version:** 1.0
+**Version:** 1.1
 **Status:** MVP Definition
 **Owner:** Pratik
 
@@ -74,7 +74,7 @@ Most engineers debug performance and reliability issues by manually jumping betw
 
 ### 4.3 Success Criteria (How We'll Know MVP Works)
 - Can run the full pipeline (code → DB → logs → correlation) against 3+ different real open-source repos without crashing or producing nonsense output.
-- The curated CodeInsight Demo Repository reliably surfaces every intentionally planted issue (circular dependencies, N+1 queries, missing indexes, connection pool exhaustion, etc.) — this is the deterministic accuracy benchmark for the whole platform.
+- The curated CodeInsight Demo Repository reliably surfaces every intentionally planted issue — `docs/EXPECTED_FINDINGS.md` serves as the official regression benchmark and acceptance baseline for the whole platform.
 - Correlation Engine output is *specific and traceable* — every claim it makes must point back to a concrete finding from one of the three analyzers (no hallucinated generalities).
 - A cold demo (no prior setup shown to the viewer, signed in with a demo account) can go from "open project" to "unified report" in under 3 minutes.
 - A previously run analysis can be revisited via a stable project URL without re-running the pipeline.
@@ -84,15 +84,18 @@ Most engineers debug performance and reliability issues by manually jumping betw
 
 ## 5. Functional Requirements
 
+*Note on Analyzer Architecture:* All three analyzers (Code, Database, Logs) adhere to a shared platform contract. Every analyzer returns a unified **Finding** model along with supporting **Evidence**, execution **Summary**, quantitative **Metrics**, and top-level **AnalyzerResult** wrapper.
+
 ### 5.1 Code Analyzer
 - **Input:** Public GitHub repository URL (shallow clone).
 - **Processing:**
   - Parse JS/TS files using AST-based extraction.
   - Build a module dependency graph.
   - Detect circular dependencies.
-  - Flag code smells: excessive file length, duplicated logic patterns, deeply nested conditionals.
+  - Flag code smells (such as excessive file length, duplicated logic patterns, deeply nested conditionals, unused utilities, stale TODO comments, or naming inconsistencies).
   - Estimate test coverage presence (heuristic: test file ratio, not full coverage instrumentation in MVP).
 - **Output:**
+  - Standardized `AnalyzerResult` payload containing unified `Finding[]` objects.
   - Visual dependency graph (nodes = modules, edges = imports).
   - Tech debt score (composite, explainable — not a black-box number).
   - Ranked list of refactor suggestions with rationale (Claude-generated, grounded in the extracted graph/smells).
@@ -101,9 +104,10 @@ Most engineers debug performance and reliability issues by manually jumping betw
 - **Input:** SQL schema (DDL) + one or more queries (paste-in).
 - **Processing:**
   - Parse queries via deterministic SQL parser.
-  - Rule-based detection: missing WHERE-clause indexes, `SELECT *` usage, unbounded result sets (no LIMIT), naive N+1 patterns (detected from repeated query structure if multiple queries provided), inefficient JOIN ordering heuristics.
+  - Rule-based detection for common anti-patterns (such as missing WHERE-clause indexes, `SELECT *` usage, unbounded result sets without LIMIT, naive N+1 patterns, correlated subqueries, duplicate query structures, unnecessary DISTINCT keywords, or inefficient JOIN ordering heuristics).
   - Claude-generated rewritten query + plain-English explanation of the fix and estimated impact.
 - **Output:**
+  - Standardized `AnalyzerResult` payload containing unified `Finding[]` objects.
   - Before/after query comparison.
   - Specific index recommendations (with the exact `CREATE INDEX` statement).
   - Explanation of *why* the original query was inefficient.
@@ -112,9 +116,10 @@ Most engineers debug performance and reliability issues by manually jumping betw
 - **Input:** Structured JSON logs via paste-in textarea only for MVP. An "Upload Log File" UI element is present but disabled, labeled "Coming Soon" (planned support: JSON, NDJSON, `.log`) — visible to communicate roadmap without adding MVP implementation complexity. Synthetic log generator included as part of the curated demo repository (see Section 5.6).
 - **Processing:**
   - Statistical anomaly detection (e.g., z-score/threshold-based spike detection on error rate, latency, custom numeric fields).
-  - Time-windowed pattern detection (e.g., "error rate up 10x in a 2-minute window").
+  - Time-windowed pattern detection (for instance, error rate spikes over a 2-minute window, connection pool exhaustion, memory leak trends, slow DB query warnings, transient connection timeouts, HTTP 500 spikes, or transaction retry recoveries).
   - Claude-generated correlation between distinct anomalies (e.g., "pool exhaustion warning precedes error spike by 2 seconds").
 - **Output:**
+  - Standardized `AnalyzerResult` payload containing unified `Finding[]` objects.
   - Timeline visualization with anomalies highlighted.
   - Ranked anomaly list with severity and explanation.
 
@@ -137,11 +142,11 @@ Most engineers debug performance and reliability issues by manually jumping betw
 
 ### 5.6 Demo Data Layer — CodeInsight Demo Repository
 - A dedicated, public GitHub repository owned and maintained by the builder, intentionally engineered to contain a known, documented set of issues:
-  - **Code layer:** circular dependencies, long methods, duplicated logic.
-  - **Database layer:** missing indexes, N+1 query patterns, unbounded/slow queries.
-  - **Runtime layer:** connection pool exhaustion, memory-leak pattern, injected anomalies in an accompanying synthetic log set.
+  - **Code layer:** realistic architecture issues such as circular dependencies, long methods, duplicated logic, stale TODOs, unused utilities, and subtle naming inconsistencies.
+  - **Database layer:** realistic SQL anti-patterns such as missing indexes, N+1 query patterns, unbounded result sets, slow queries, correlated subqueries, duplicate query logic, and unnecessary DISTINCT calls.
+  - **Runtime layer:** realistic operational events such as connection pool exhaustion, memory leak trends, slow DB queries, transient timeouts, HTTP 500 errors, retry recoveries, and clean baseline periods.
 - Loadable with one click as a pre-configured "project" — no user input required, making cold interview demos reliable and repeatable.
-- Doubles as the platform's accuracy benchmark: since every issue is known and documented ahead of time, analyzer output can be verified against ground truth, and this verification becomes a stated, defensible metric (e.g., "detects 9/9 planted issues").
+- `docs/EXPECTED_FINDINGS.md` serves as the canonical regression benchmark and acceptance baseline: every planted issue and cross-layer correlation causal chain is documented ahead of time so analyzer precision can be validated deterministically.
 - Treated as a first-class product artifact, not just internal test data — referenced in the dashboard as a real, linkable public repo.
 
 ### 5.7 Authentication & Project Persistence
@@ -213,7 +218,7 @@ Most engineers debug performance and reliability issues by manually jumping betw
 
 These were open questions in draft v0.1 and are now locked for Architecture.md:
 
-1. **Demo Dataset:** Support analysis of any public GitHub repository while also providing a built-in, publicly hosted **CodeInsight Demo Repository** containing intentionally designed architecture, database, and runtime issues — used for deterministic demonstrations and as the platform's accuracy benchmark (see Section 5.6).
+1. **Demo Dataset:** Support analysis of any public GitHub repository while also providing a built-in, publicly hosted **CodeInsight Demo Repository** containing intentionally designed architecture, database, and runtime issues — used for deterministic demonstrations and as the platform's official regression benchmark with `docs/EXPECTED_FINDINGS.md` as the acceptance baseline (see Section 5.6).
 
 2. **Log Input:** MVP supports structured JSON log paste-in only. A disabled "Upload Log File" interface is included in the UI to communicate the planned roadmap (JSON, NDJSON, `.log` support) without increasing MVP implementation complexity (see Section 5.3).
 
