@@ -1,0 +1,18 @@
+{
+  "name": "task-ledger-service",
+  "version": "1.0.0",
+  "description": "Internal task management and billing ledger microservice demo codebase",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
