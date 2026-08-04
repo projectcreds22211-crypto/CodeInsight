@@ -25,14 +25,14 @@
 
 *Goal: Establish shared domain models, analyzer contracts, API skeleton, and UI application shell. The first analyzer must NOT begin until these contracts exist.*
 
-- [ ] 1.1 — Define shared `Analyzer` contract interface (`analyze()`, `validateInput()`, metadata)
-- [ ] 1.2 — Define shared `Finding` model (ID, category, severity, title, description, metadata, timestamps)
-- [ ] 1.3 — Define shared `Evidence` model (location, snippet, line numbers, metric thresholds, raw payload pointers)
-- [ ] 1.4 — Define shared `AnalyzerResult` model (`status`, `sessionId`, `findings`, `metrics`, `summary`)
-- [ ] 1.5 — Define shared severity (`low`, `medium`, `high`, `critical`) and category enums
-- [ ] 1.6 — Define shared metrics and summary models for analyzer output aggregation
-- [ ] 1.7 — Build `codeinsight-api` Fastify API skeleton (server bootstrap, plugin setup, health routes)
-- [ ] 1.8 — Build `codeinsight-web` frontend application shell (React SPA shell, app layout, tab navigation, route structure)
+- [x] 1.1 — Define shared `Analyzer` contract interface (`analyze()`, `validateInput()`, metadata)
+- [x] 1.2 — Define shared `Finding` model (ID, category, severity, title, description, metadata, timestamps)
+- [x] 1.3 — Define shared `Evidence` model (location, snippet, line numbers, metric thresholds, raw payload pointers)
+- [x] 1.4 — Define shared `AnalyzerResult` model (`status`, `sessionId`, `findings`, `metrics`, `summary`)
+- [x] 1.5 — Define shared severity (`low`, `medium`, `high`, `critical`) and category enums
+- [x] 1.6 — Define shared metrics and summary models for analyzer output aggregation
+- [x] 1.7 — Build `codeinsight-api` Fastify API skeleton (server bootstrap, plugin setup, health routes)
+- [x] 1.8 — Build `codeinsight-web` frontend application shell (React SPA shell, app layout, tab navigation, route structure)
 
 ---
 
@@ -40,15 +40,15 @@
 
 *Goal: the thinnest possible slice of real infrastructure — sign in, see an empty project list, create a project. No analyzer logic yet.*
 
-- [ ] 2.1 — Configure monorepo workspace scripts and build pipeline across `codeinsight-web`, `codeinsight-api`, and packages
-- [ ] 2.2 — Set up Neon Postgres instance, connect Drizzle, run first migration with `users` and `projects` tables
-- [ ] 2.3 — Integrate Clerk on frontend (sign-in/sign-up UI) and backend (JWT verification middleware)
-- [ ] 2.4 — Build the Clerk webhook → sync new users into the `users` table
-- [ ] 2.5 — Build `POST /api/projects` and `GET /api/projects` (real, auth-scoped)
-- [ ] 2.6 — Build the "My Projects" list UI + "Create Project" flow (manual entry: name + optional GitHub URL)
-- [ ] 2.7 — Build the one-click "Load Demo Repository" project-creation path (`POST /api/projects/demo`), pointing at the Phase 0 repo
-- [ ] 2.8 — Apply Design.md's `theme-marketing` to auth screens and `theme-app` to the dashboard shell (sidebar, project list) — first real design-system checkpoint
-- [ ] 2.9 — Verify: sign up → see empty project list → create a project (manual and demo) → project appears — full loop working before moving on
+- [x] 2.1 — Configure monorepo workspace scripts and build pipeline across `codeinsight-web`, `codeinsight-api`, and packages
+- [x] 2.2 — Set up Neon Postgres instance, connect Drizzle, run first migration with `users` and `projects` tables
+- [x] 2.3 — Integrate Clerk on frontend (sign-in/sign-up UI) and backend (JWT verification middleware)
+- [x] 2.4 — Build the Clerk webhook → sync new users into the `users` table
+- [x] 2.5 — Build `POST /api/projects` and `GET /api/projects` (real, auth-scoped)
+- [x] 2.6 — Build the "My Projects" list UI + "Create Project" flow (manual entry: name + optional GitHub URL)
+- [x] 2.7 — Build the one-click "Load Demo Repository" project-creation path (`POST /api/projects/demo`), pointing at the Phase 0 repo
+- [x] 2.8 — Apply Design.md's `theme-marketing` to auth screens and `theme-app` to the dashboard shell (sidebar, project list) — first real design-system checkpoint
+- [x] 2.9 — Verify: sign up → see empty project list → create a project (manual and demo) → project appears — full loop working before moving on
 
 **Checkpoint:** this phase is "done" when you can demo signing in and creating a project live, even though nothing can be analyzed yet.
 

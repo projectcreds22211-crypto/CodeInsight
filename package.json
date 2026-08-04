@@ -1,0 +1,16 @@
+{
+  "name": "codeinsight-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CodeInsight Monorepo Workspace",
+  "workspaces": [
+    "codeinsight-web",
+    "codeinsight-api",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:contracts": "npm run build --workspace=@codeinsight/shared-contracts",
+    "build": "npm run build:contracts && npm run build --workspace=codeinsight-web",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

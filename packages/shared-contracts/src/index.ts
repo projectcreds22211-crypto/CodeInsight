@@ -1,3 +1,4 @@
+export * from './contracts/analyzer.js';
 export * from './enums/analyzer-type.js';
 export * from './enums/category.js';
 export * from './enums/severity.js';
@@ -7,3 +8,4 @@ export * from './models/analyzer-summary.js';
 export * from './models/evidence.js';
 export * from './models/finding.js';
 export * from './utils/result.js';
+

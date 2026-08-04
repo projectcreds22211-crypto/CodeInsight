@@ -6,15 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.9",
+    "@codeinsight/shared-contracts": "*",
     "@tanstack/react-query": "^5.101.4",
     "lucide-react": "^1.28.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
     "reactflow": "^11.11.4",
     "recharts": "^3.10.1"
   },
