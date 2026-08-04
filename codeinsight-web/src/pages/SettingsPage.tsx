@@ -57,7 +57,9 @@ export const SettingsPage: React.FC = () => {
             </div>
             <div>
               <h3 className="font-bold text-sm" style={{ color: 'var(--ink)' }}>Backend Fastify Service</h3>
-              <p className="text-xs font-mono" style={{ color: 'var(--ink-soft)' }}>http://localhost:3001 (codeinsight-api)</p>
+              <p className="text-xs font-mono" style={{ color: 'var(--ink-soft)' }}>
+                {import.meta.env.VITE_API_URL || 'http://localhost:3001'}
+              </p>
             </div>
           </div>
         </div>
