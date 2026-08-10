@@ -2,6 +2,7 @@
   "name": "@codeinsight/shared-contracts",
   "version": "1.0.0",
   "description": "Shared platform interfaces, models, and contracts for CodeInsight analyzers",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
