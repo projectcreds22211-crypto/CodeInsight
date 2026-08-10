@@ -1,0 +1,9 @@
+{
+  "outputDirectory": "codeinsight-web/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
