@@ -140,7 +140,7 @@ _Goal: make it demoable cold, to anyone, at any time._
 - [x] 7.5 — Set up ESLint + Prettier + Husky pre-commit across monorepo packages (Configured root flat ESLint, Prettier, Husky & lint-staged; verified clean monorepo lint pass)
 - [x] 7.6 — Rate limiting and repo-size caps on `/analyze/*` endpoints (Rules.md Section 5; verified user-scoped sliding window rate limiter, concurrency guard, and 500-file / 1MB / 10MB repository safety inspection)
 - [x] 7.7 — Deploy `codeinsight-web` to Vercel, `codeinsight-api` to Render, verify env vars, verify Clerk/Neon/Anthropic keys work in production (Configured Render blueprint `render.yaml`, Vercel `vercel.json` SPA rewrites, environment config validator `env.ts`, CORS multi-origin parsing, and startup diagnostic key masking; verified with 6 unit tests)
-- [ ] 7.8 — End-to-end smoke test in production: sign up fresh, load demo project, run all three analyzers, run correlation, confirm the full loop works with zero local setup (Implementation & local integration verified; awaiting cloud PaaS deployment tokens for live Vercel/Render E2E run)
+- [ ] 7.8 — End-to-end smoke test in production: sign up fresh, load demo project, run all three analyzers, run correlation, confirm the full loop works with zero local setup (Repository main branch pushed to GitHub `a19cc31`; awaiting Vercel & Render cloud service activation)
 - [ ] 7.9 — Record the demo video (per your original interview-readiness goal)
 - [ ] 7.10 — Final Memory.md update summarizing the whole build, key decisions, and known limitations — this becomes your interview prep notes as much as a dev log
 
