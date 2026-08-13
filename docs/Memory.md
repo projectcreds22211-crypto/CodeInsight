@@ -135,6 +135,37 @@ _(Pulls forward the major locked decisions from planning so they don't get lost 
 
 ## Session Log
 
+### 2026-08-14 — Phase 7.8E Backend Deployment & E2E Audit — [Tool used: Antigravity]
+
+**Completed:**
+
+- Verified frontend deployment and evaluated backend deployment requirements:
+  - **Vercel Frontend:** Live & HTTP-verified at `https://code-insight-codeinsight-web-nu.vercel.app` (`dpl_EVx6y3WbUbzqYMCGnJisucy3GCn9`).
+  - **Render Backend Status:** Checked Render environment access; Render CLI and `RENDER_API_KEY` are not configured in local environment. Render blueprint deployment requires dashboard repository link.
+  - **Regression Test Verification:** 319/319 backend tests passed (111 test suites), 34/34 frontend tests passed (6 test suites), 0 TypeScript errors, monorepo build succeeded (`npm run build`), 0 ESLint errors.
+  - **Phase Boundary:** Maintained `[ ] 7.8` status in `docs/Phases.md` per Step 14 instructions until Render API is activated and live authenticated E2E user flow is complete.
+- Overall Verdict: **PHASE 7.8 BLOCKED**
+
+**Decisions made (and why):**
+
+- Strict Policy Compliance: Refused to fabricate a Render API URL or pretend backend deployment is complete without live HTTP evidence.
+
+**Deviations from Phases.md / Architecture.md (if any):**
+
+- None.
+
+**Known bugs / unfinished edges:**
+
+- Render API web service deployment requires linking `render.yaml` blueprint on Render dashboard.
+
+**Flagged items needing Pratik's review** (per Rules.md Section 10):
+
+- Connect repository `projectcreds22211-crypto/CodeInsight` on Render dashboard to deploy `codeinsight-api` web service.
+
+**Next session should start with:**
+
+- Live E2E smoke test execution against live Render API URL once deployed.
+
 ### 2026-08-14 — Phase 7.8 Vercel Frontend Production Deployment — [Tool used: Antigravity]
 
 **Completed:**
