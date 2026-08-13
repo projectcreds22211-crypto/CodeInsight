@@ -135,6 +135,37 @@ _(Pulls forward the major locked decisions from planning so they don't get lost 
 
 ## Session Log
 
+### 2026-08-14 — Phase 7.8 Render Deployment Access Audit — [Tool used: Antigravity]
+
+**Completed:**
+
+- Verified Render deployment access and infrastructure blueprint readiness:
+  - **Vercel Frontend:** Live & HTTP-verified at `https://code-insight-codeinsight-web-nu.vercel.app` (`dpl_EVx6y3WbUbzqYMCGnJisucy3GCn9`).
+  - **Render Access Audit:** Checked Render API environment variables (`RENDER_API_KEY` and `RENDER_SERVICE_ID` are `false`). Render CLI is not installed locally.
+  - **Blueprint Inspection:** Confirmed `render.yaml` infrastructure-as-code manifest is complete and ready (`buildCommand: npm run build:contracts && npm run build --workspace=codeinsight-api`, `healthCheckPath: /health`, `autoDeploy: true`).
+  - **Phase Status:** Maintained `[ ] 7.8` in `docs/Phases.md` per Step 12 governance rules until Render Web Service is created on Render dashboard and public URL is verified.
+- Overall Verdict: **BLOCKED (VERCEL FRONTEND LIVE; AWAITING RENDER DASHBOARD BLUEPRINT LINK)**
+
+**Decisions made (and why):**
+
+- Strict Verification Discipline: Refused to fabricate a Render deployment URL or claim backend completion without live HTTP evidence.
+
+**Deviations from Phases.md / Architecture.md (if any):**
+
+- None.
+
+**Known bugs / unfinished edges:**
+
+- Render Web Service requires developer linking of `projectcreds22211-crypto/CodeInsight` repository on Render dashboard.
+
+**Flagged items needing Pratik's review** (per Rules.md Section 10):
+
+- Create Blueprint Web Service on Render dashboard using `render.yaml` to deploy `codeinsight-api`.
+
+**Next session should start with:**
+
+- Public `/health` HTTP verification and live production E2E smoke test once Render service is active.
+
 ### 2026-08-14 — Phase 7.8E Backend Deployment & E2E Audit — [Tool used: Antigravity]
 
 **Completed:**
