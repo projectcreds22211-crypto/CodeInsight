@@ -38,7 +38,7 @@ Copy this template to the top of the "Session Log" section below for each sessio
 
 _(Keep this section updated to reflect the single source of truth — overwrite, don't just append)_
 
-- **Current Phase:** Phase 7.8 (End-to-end smoke test in production) — Implementation Verified; Awaiting Cloud PaaS Deploy Tokens
+- **Current Phase:** Phase 7.8 (Vercel Frontend Live: `https://code-insight-codeinsight-web-nu.vercel.app`; Awaiting Render API Cloud Deployment)
 - **Shared Contracts:** Complete
 - **API Skeleton:** Complete
 - **Frontend Shell:** Complete
@@ -134,6 +134,37 @@ _(Pulls forward the major locked decisions from planning so they don't get lost 
 ---
 
 ## Session Log
+
+### 2026-08-14 — Phase 7.8 Vercel Frontend Production Deployment — [Tool used: Antigravity]
+
+**Completed:**
+
+- Executed Vercel production deployment and verified live public availability:
+  - **Root Cause & Fix:** Identified root cause of Vercel `npm install` exit code 127 (`"prepare": "husky"` attempting to execute husky binary in CI container without `.git` or devDependencies). Guarded root `package.json` prepare script with `node -e` condition; committed (`be87ec3`) and pushed to `main`.
+  - **Production Deployment:** Triggered `npx vercel --prod --yes` against project `projectcreds/code-insight-codeinsight-web` (Deployment ID: `dpl_EVx6y3WbUbzqYMCGnJisucy3GCn9`).
+  - **Live URL Verification:** Verified live public HTTP response at `https://code-insight-codeinsight-web-nu.vercel.app` returning compiled Vite React application HTML `<title>CodeInsight — AI Engineering Intelligence Platform</title>`, root `<div id="root"></div>`, and production JS/CSS assets.
+- Overall Verdict: **PARTIAL (VERCEL FRONTEND LIVE AT `https://code-insight-codeinsight-web-nu.vercel.app`; AWAITING RENDER API DEPLOYMENT)**
+
+**Decisions made (and why):**
+
+- Strict Phase Boundary: Maintained `[ ] 7.8` status in `docs/Phases.md` per Step 10 rules until Render API is deployed and the live authenticated E2E user journey is completed.
+
+**Deviations from Phases.md / Architecture.md (if any):**
+
+- None.
+
+**Known bugs / unfinished edges:**
+
+- Render API web service deployment requires linking `render.yaml` blueprint on Render dashboard.
+
+**Flagged items needing Pratik's review** (per Rules.md Section 10):
+
+- **Deployment Fix Flag:** Modified `package.json` `"prepare"` script to skip Husky in CI environments.
+- **Live Vercel Frontend:** Verified live at `https://code-insight-codeinsight-web-nu.vercel.app`.
+
+**Next session should start with:**
+
+- Render API blueprint deployment (`render.yaml`) and live end-to-end smoke test.
 
 ### 2026-08-14 — Phase 7.8E Production E2E Verification Audit — [Tool used: Antigravity]
 
