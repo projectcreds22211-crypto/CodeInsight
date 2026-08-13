@@ -1,0 +1,18 @@
+# Dependencies & Build Output
+node_modules
+dist
+build
+coverage
+.next
+.vite
+
+# Lockfiles & Generated metadata
+package-lock.json
+drizzle
+*.log
+
+# System & Tooling artifacts
+.system_generated
+.git
+.gemini
+codeinsight-demo-repo

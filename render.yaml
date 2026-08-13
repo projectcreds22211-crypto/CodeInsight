@@ -1,0 +1,34 @@
+# ==============================================================================
+# CodeInsight — Render Infrastructure Blueprint (render.yaml)
+# Production Deployment Blueprint for codeinsight-api on Render.com PaaS
+# ==============================================================================
+
+services:
+  - type: web
+    name: codeinsight-api
+    env: node
+    region: ohio
+    plan: free
+    buildCommand: npm run build:contracts && npm run build --workspace=codeinsight-api
+    startCommand: npm run start --workspace=codeinsight-api
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

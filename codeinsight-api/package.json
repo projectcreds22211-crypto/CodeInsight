@@ -9,6 +9,8 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/analyzers/database/*.test.ts src/analyzers/logs/*.test.ts src/analyzers/code/**/*.test.ts src/correlation/*.test.ts src/routes/*.test.ts",
+    "test:external": "tsx --test src/analyzers/code/code-analyzer.external.test.ts",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {

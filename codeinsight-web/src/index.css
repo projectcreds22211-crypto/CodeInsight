@@ -1,33 +1,33 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @layer base {
   :root {
     /* ====== Core Tokens (Design.md Section 2) ====== */
-    --ink: #211F1D;
-    --ink-soft: #57534E;
-    --accent-coral: #FF9EB0;
-    --accent-coral-deep: #F5748C;
-    --thread-purple: #6B4CE6;
-    --thread-violet: #3A2A85;
-    --success: #3E9C6E;
-    --warning: #D98E3B;
-    --critical: #D9483E;
+    --ink: #211f1d;
+    --ink-soft: #57534e;
+    --accent-coral: #ff9eb0;
+    --accent-coral-deep: #f5748c;
+    --thread-purple: #6b4ce6;
+    --thread-violet: #3a2a85;
+    --success: #3e9c6e;
+    --warning: #d98e3b;
+    --critical: #d9483e;
 
     /* ====== theme-app Surface Tokens ====== */
-    --surface-bg: #F7F6F3;
-    --surface-card: #FFFFFF;
-    --surface-sidebar: #211F1D;
-    --surface-outline: #E7E4DD;
+    --surface-bg: #f7f6f3;
+    --surface-card: #ffffff;
+    --surface-sidebar: #211f1d;
+    --surface-outline: #e7e4dd;
 
     /* ====== theme-marketing Surface Tokens ====== */
-    --surface-bg-marketing: #FBEEDD;
-    --surface-card-marketing: #FFF8EE;
-    --surface-outline-marketing: #EDE0CC;
+    --surface-bg-marketing: #fbeedd;
+    --surface-card-marketing: #fff8ee;
+    --surface-outline-marketing: #ede0cc;
 
     /* ====== Analyzer Identity Colors ====== */
-    --analyzer-code: #6B4CE6;
-    --analyzer-db: #2E9C8F;
-    --analyzer-logs: #D98E3B;
+    --analyzer-code: #6b4ce6;
+    --analyzer-db: #2e9c8f;
+    --analyzer-logs: #d98e3b;
 
     /* ====== Typography (Design.md Section 3) ====== */
     --font-display: 'Instrument Sans', sans-serif;
@@ -61,11 +61,27 @@
     color: var(--ink);
   }
 
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  .font-display {
     font-family: var(--font-display);
   }
 
-  code, pre, .font-mono {
+  code,
+  pre,
+  .font-mono {
     font-family: var(--font-mono);
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role='button']:focus-visible,
+  [role='tab']:focus-visible {
+    outline: 2px solid var(--thread-purple);
+    outline-offset: 2px;
   }
 }

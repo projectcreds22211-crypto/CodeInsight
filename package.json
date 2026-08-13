@@ -2,6 +2,7 @@
   "name": "codeinsight-monorepo",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "description": "CodeInsight Monorepo Workspace",
   "workspaces": [
     "codeinsight-web",
@@ -9,8 +10,33 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm run build:contracts && concurrently -k -n api,web -c purple,cyan \"npm run dev --workspace=codeinsight-api\" \"npm run dev --workspace=codeinsight-web\"",
     "build:contracts": "npm run build --workspace=@codeinsight/shared-contracts",
     "build": "npm run build:contracts && npm run build --workspace=codeinsight-web",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^9.1.2",
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.67.0"
   }
 }

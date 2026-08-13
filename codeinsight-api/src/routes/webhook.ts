@@ -2,10 +2,14 @@ import type { FastifyInstance } from 'fastify';
 import { verifyClerkWebhook, processClerkWebhook } from '../services/webhook.service.js';
 
 export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
+  // Raw body parser for application/json scoped to webhook plugin to preserve exact Svix signature payload
+  fastify.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
+    done(null, body);
+  });
+
   fastify.post('/api/webhooks/clerk', async (request, reply) => {
-    const rawPayload = typeof request.body === 'string'
-      ? request.body
-      : JSON.stringify(request.body);
+    const rawPayload =
+      typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
 
     let event;
     try {

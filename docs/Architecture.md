@@ -9,6 +9,7 @@
 ## 1. Tech Stack
 
 ### Frontend (Package: `codeinsight-web`)
+
 ```
 React 18 + TypeScript + Vite
 Tailwind CSS + shadcn/ui (copied-in components, not a dependency)
@@ -20,6 +21,7 @@ Clerk React SDK      → auth UI + session
 ```
 
 ### Backend (Package: `codeinsight-api`)
+
 ```
 Node.js + Fastify + TypeScript
 Zod                  → request/response validation
@@ -33,6 +35,7 @@ Clerk Node SDK (fastify-clerk or manual JWT verification) → auth middleware
 ```
 
 ### Shared Contracts (Package: `packages/shared-contracts`)
+
 ```
 TypeScript Interfaces & Domain Schemas
 - Common Finding model
@@ -43,16 +46,18 @@ TypeScript Interfaces & Domain Schemas
 ```
 
 ### Database & Infra
+
 ```
 PostgreSQL — hosted on Neon (serverless, generous free tier)
 Auth — Clerk (identity/session), webhook-synced into Neon `users` table
 Frontend deploy — Vercel
-Backend deploy — Railway
+Backend deploy — Render
 ```
 
 ### Why This Combination (for your own reference in interviews)
+
 - **Fastify over Express:** ~2x throughput, schema-based validation built in, still simple enough to explain in 30 seconds.
-- **Drizzle over Prisma:** SQL-close syntax, no query-engine binary, faster cold starts on Railway — relevant since analyzer endpoints are already CPU-heavy (AST/SQL parsing).
+- **Drizzle over Prisma:** SQL-close syntax, no query-engine binary, faster cold starts on Render — relevant since analyzer endpoints are already CPU-heavy (AST/SQL parsing).
 - **Clerk over Supabase Auth:** Neon is the DB of record, not Supabase — Clerk decouples identity from database choice and has the better free-tier DX for a solo project.
 - **Monorepo Architecture:** Single Git repository (`CodeInsight`) sharing TypeScript contracts (`packages/shared-contracts`) between backend API, frontend web client, and benchmark fixtures without code duplication.
 - **SSE over WebSockets:** Correlation Engine output is one-directional (server → client streaming reasoning) — SSE is simpler than WebSockets for this and Fastify supports it natively.
@@ -324,7 +329,7 @@ Given the "React Context + useState only" decision — clear rules to avoid this
                            ▼
 ┌──────────────┐    REST + SSE     ┌──────────────┐        ┌────────────┐
 │ codeinsight-  │ ────────────────▶│ codeinsight- │───────▶│    Neon    │
-│ web (Vercel)  │◀──────────────── │ api (Railway)│        │ (Postgres) │
+│ web (Vercel)  │◀──────────────── │ api (Render) │        │ (Postgres) │
 └──────────────┘                   └──────┬───────┘        └────────────┘
                                            │
                                            ▼
@@ -333,7 +338,7 @@ Given the "React Context + useState only" decision — clear rules to avoid this
                                    └──────────────┘
 ```
 
-- Environment variables (Clerk keys, Neon connection string, Anthropic API key) managed via Railway/Vercel dashboards — never committed.
+- Environment variables (Clerk keys, Neon connection string, Anthropic API key) managed via Render/Vercel dashboards — never committed.
 - `codeinsight-api` shallow-clones target repos into a temp directory (`os.tmpdir()`), deleted in a `finally` block after analysis — no persistent filesystem state on the backend.
 
 ---
